@@ -33,7 +33,7 @@ class City {
   updateWeather(data) {
     // name is added here to shortcut sortCities
     this.weather = {
-      name: this.location,
+      city: this.location,
       temp: Math.round(data.main.temp),
       humidity: data.main.humidity,
       conditions: data.weather[0].main,
