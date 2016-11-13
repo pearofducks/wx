@@ -1,4 +1,4 @@
-# tdwx
+# wx
 
 A weather fetching app, based on [vue](vuejs.org)
 
