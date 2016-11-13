@@ -50,22 +50,25 @@ const mutations = {
   addCity: (state, location = "") => state.cities.push(new City(location)),
   removeCity: (state, id) => {
     state.cities = state.cities.filter( city => city.id != id )
+    // prevent state.cities from being empty (thus no inputs shown to user)
     if (state.cities.length == 0) { state.cities.push(new City("")) }
   },
   replaceCities: (state, newcities) => state.cities = newcities,
   clearSort: (state) => state.sortingBy = '',
   sortCities: (state, attribute) => {
-    state.sortAsc = !state.sortAsc
-    state.sortingBy = attribute
+    if (state.sortingBy === attribute) {
+      state.sortAsc = !state.sortAsc
+    }
+    else {
+      state.sortingBy = attribute
+      state.sortAsc = true
+    }
     state.cities.sort( (a,b) => {
-      if (state.sortAsc) {
-        let t = b
-        b = a
-        a = t
-      }
-      if (a.weather[attribute] < b.weather[attribute]) { return -1 }
-      else if (a.weather[attribute] > b.weather[attribute]) { return 1 }
-      else { return 0 }
+      if (state.sortAsc) { [a, b] = [b, a] }
+      return a.weather[attribute] - b.weather[attribute]
+      // if (a.weather[attribute] < b.weather[attribute]) { return -1 }
+      // else if (a.weather[attribute] > b.weather[attribute]) { return 1 }
+      // else { return 0 }
     })
   }
 }
@@ -93,7 +96,8 @@ const actions = {
         city.clearWeather()
         city.isFetching = true
         fetched = true
-        fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city.searchLocation()}&APPID=KEY_GOES_HERE&units=metric`)
+        let appid = ''
+        fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city.searchLocation()}&APPID=${appid}&units=metric`)
           .then((response) => { return response.ok ? response.json() : "" })
           .then((json) => { city.updateWeather(json) })
           .catch((error) => {

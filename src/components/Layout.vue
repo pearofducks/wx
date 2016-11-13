@@ -1,12 +1,14 @@
 <template>
   <div id="app" class="container">
     <header>
-      <h1 class="element city">td | wx</h1>
-      <h2 v-if="this.$store.getters.noCitiesHaveLocation" class="messages">Welcome, please enter a location</h2>
+      <h1 class="element city">wx</h1>
+      <h2 v-if="noCitiesHaveLocation" class="messages">Welcome, please enter a location</h2>
     </header>
-    <div class="headers row" :class="{ 'dim': this.$store.getters.noCitiesHaveLocation }">
+    <div class="headers row" :class="{ 'dim': noCitiesHaveLocation }">
       <div class="element add-remove"><button class="circle" @click="addCity">+</button></div>
-      <div class="element label" :class="header" v-for="header in weatherAttributes"><h3 class="clickable" :class="{ 'active': currentlySorting(header), 'descending': direction() }" @click="sortBy(header)" >{{ header }}</h3></div>
+      <div class="element label" :class="header" v-for="header in weatherAttributes">
+        <h3 class="clickable" :class="{ 'active': currentlySorting(header), 'descending': direction() }" @click="sortBy(header)" >{{ header }}</h3>
+      </div>
     </div>
     <transition-group name="wx-list">
       <Weather :weatherAttributes="weatherAttributes" :city="city" v-for="city in cities" :key="city.id" />
@@ -15,7 +17,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 import Weather from './Weather'
 
 export default {
@@ -29,10 +31,13 @@ export default {
     this.$store.dispatch('loadCities')
     this.$store.dispatch('getWeather')
   },
-  computed: mapState({
-    cities: state => state.cities,
-    sortingBy: state => state.sortingBy
-  }),
+  computed: {
+    ...mapGetters(['noCitiesHaveLocation']),
+    ...mapState({
+      cities: state => state.cities,
+      sortingBy: state => state.sortingBy
+    })
+  },
   methods: {
     addCity () { this.$store.commit('addCity') },
     remove () { this.$store.commit('addCity') },
@@ -100,21 +105,10 @@ p.wind { margin-left: 0.7rem; }
   to { opacity: 1; transform: none; }
 }
 @keyframes bounce {
-  from, 20%, 53%, 80%, to {
-    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    transform: translate3d(0, 0, 0);
-  }
-  40%, 43% {
-    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-    transform: translate3d(0, -20px, 0);
-  }
-  70% {
-    animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
-    transform: translate3d(0, -10px, 0);
-  }
-  90% {
-    transform: translate3d(0, -4px, 0);
-  }
+  from, 20%, 53%, 80%, to { animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1); transform: translate3d(0, 0, 0); }
+  40%, 43% { animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06); transform: translate3d(0, -20px, 0); }
+  70% { animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06); transform: translate3d(0, -10px, 0); }
+  90% { transform: translate3d(0, -4px, 0); }
 }
 @media only screen and (max-width: 1080px) { html { font-size: 8px; } }
 @media only screen and (max-width: 480px) {
