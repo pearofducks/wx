@@ -66,9 +66,6 @@ const mutations = {
     state.cities.sort( (a,b) => {
       if (state.sortAsc) { [a, b] = [b, a] }
       return a.weather[attribute] - b.weather[attribute]
-      // if (a.weather[attribute] < b.weather[attribute]) { return -1 }
-      // else if (a.weather[attribute] > b.weather[attribute]) { return 1 }
-      // else { return 0 }
     })
   }
 }
