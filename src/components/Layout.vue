@@ -11,7 +11,7 @@
       </div>
     </div>
     <transition-group name="wx-list">
-      <Weather :weatherAttributes="weatherAttributes" :city="city" v-for="city in cities" :key="city.id" />
+      <Weather :city="city" v-for="city in cities" :key="city.id" />
     </transition-group>
   </div>
 </template>
