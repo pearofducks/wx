@@ -40,7 +40,6 @@ export default {
   },
   methods: {
     addCity () { this.$store.commit('addCity') },
-    remove () { this.$store.commit('addCity') },
     sortBy (attribute) { this.$store.dispatch('sortBy', attribute) },
     currentlySorting(header) { return this.sortingBy === header },
     direction () { return this.$store.state.sortAsc }
