@@ -22,7 +22,7 @@
 import debounce from 'lodash.debounce'
 
 export default {
-  props: ['city', 'weatherAttributes'],
+  props: ['city'],
   methods: {
     lazyGetWeather: debounce(function () {
       this.getWeather()
