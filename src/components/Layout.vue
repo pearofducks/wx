@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 import Weather from './Weather'
 
 export default {
@@ -28,8 +28,8 @@ export default {
   },
   components: { Weather },
   mounted: function () {
-    this.$store.dispatch('loadCities')
-    this.$store.dispatch('getWeather')
+    this.loadCities()
+    this.getWeather()
   },
   computed: {
     ...mapGetters(['noCitiesHaveLocation']),
@@ -42,7 +42,8 @@ export default {
     addCity () { this.$store.commit('addCity') },
     sortBy (attribute) { this.$store.dispatch('sortBy', attribute) },
     currentlySorting(header) { return this.sortingBy === header },
-    direction () { return this.$store.state.sortAsc }
+    direction () { return this.$store.state.sortAsc },
+    ...mapActions(['loadCities', 'getWeather'])
   }
 }
 </script>

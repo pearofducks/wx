@@ -20,6 +20,7 @@
 
 <script>
 import debounce from 'lodash.debounce'
+import { mapActions } from 'vuex'
 
 export default {
   props: ['city'],
@@ -27,9 +28,9 @@ export default {
     lazyGetWeather: debounce(function () {
       this.getWeather()
     }, 1000) ,
-    getWeather () { this.$store.dispatch('getWeather') },
     windStyle () { return { transform: `rotate(${ this.city.weather.windDirection }deg)` } },
-    remove() { this.$store.commit('removeCity', this.city.id) }
+    remove() { this.$store.commit('removeCity', this.city.id) },
+    ...mapActions(['getWeather'])
   }
 }
 </script>
