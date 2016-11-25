@@ -84,7 +84,6 @@ const actions = {
   removeCity: ({commit, state}, id) => {
     commit('removeCity', id)
     // prevent state.cities from being empty (thus no inputs shown to user)
-    console.log(state.cities.length)
     if (state.cities.length == 0) {
       commit('clearSort')
       commit('addCity')
