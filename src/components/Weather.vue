@@ -29,7 +29,7 @@ export default {
       this.getWeather()
     }, 1000) ,
     windStyle () { return { transform: `rotate(${ this.city.weather.windDirection }deg)` } },
-    remove() { this.$store.commit('removeCity', this.city.id) },
+    remove() { this.$store.dispatch('removeCity', this.city.id) },
     ...mapActions(['getWeather'])
   }
 }

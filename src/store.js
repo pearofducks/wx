@@ -30,16 +30,29 @@ class City {
   hasWeather() {
     return Object.keys(this.weather).length != 0
   }
-  updateWeather(data) {
-    // name is added here to shortcut sortCities
+  updateWeather() {
+    this.clearWeather()
+    this.isFetching = true
+    let appid = ''
+    fetch(`http://api.openweathermap.org/data/2.5/weather?q=${this.searchLocation()}&APPID=${appid}&units=metric`)
+      .then((response) => { return response.ok ? response.json() : "" })
+      .then((json) => { this.updateWeatherSuccess(json) })
+      .catch((error) => { this.updateWeatherFailure(error) })
+  }
+  updateWeatherFailure(error) {
+    console.log(error)
+    this.isFetching = false
+    this.hasError = true
+  }
+  updateWeatherSuccess(json) {
     this.weather = {
       city: this.location,
-      temp: Math.round(data.main.temp),
-      humidity: data.main.humidity,
-      conditions: data.weather[0].main,
-      wind: data.wind.speed,
-      windDirection: data.wind.deg,
-      country: countryCodes[data.sys.country].name
+      temp: Math.round(json.main.temp),
+      humidity: json.main.humidity,
+      conditions: json.weather[0].main,
+      wind: json.wind.speed,
+      windDirection: json.wind.deg,
+      country: countryCodes[json.sys.country].name
     }
     this.isFetching = false
   }
@@ -48,11 +61,7 @@ class City {
 const state = { cities: [], sortingBy: '', sortAsc: true }
 const mutations = {
   addCity: (state, location = "") => state.cities.push(new City(location)),
-  removeCity: (state, id) => {
-    state.cities = state.cities.filter( city => city.id != id )
-    // prevent state.cities from being empty (thus no inputs shown to user)
-    if (state.cities.length == 0) { state.cities.push(new City("")) }
-  },
+  removeCity: (state, id) => { state.cities = state.cities.filter( city => city.id != id ) },
   replaceCities: (state, newcities) => state.cities = newcities,
   clearSort: (state) => state.sortingBy = '',
   sortCities: (state, attribute) => {
@@ -72,6 +81,15 @@ const mutations = {
   }
 }
 const actions = {
+  removeCity: ({commit, state}, id) => {
+    commit('removeCity', id)
+    // prevent state.cities from being empty (thus no inputs shown to user)
+    console.log(state.cities.length)
+    if (state.cities.length == 0) {
+      commit('clearSort')
+      commit('addCity')
+    }
+  },
   sortBy: ({commit, state}, attribute) => { commit('sortCities', attribute) },
   loadCities: ({commit, state}) => {
     let storedCities = localStorage.getItem('cities')
@@ -92,33 +110,22 @@ const actions = {
       }
       if (city.newLocation() || ! city.hasWeather()) {
         commit('clearSort')
-        city.clearWeather()
-        city.isFetching = true
         fetched = true
-        let appid = ''
-        fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city.searchLocation()}&APPID=${appid}&units=metric`)
-          .then((response) => { return response.ok ? response.json() : "" })
-          .then((json) => { city.updateWeather(json) })
-          .catch((error) => {
-            console.log(error)
-            city.isFetching = false
-            city.hasError = true
-          })
+        city.updateWeather()
       }
     })
-    if (fetched) { getters.saveCities }
+    if (fetched) {
+      let valid = getters.validCities
+      let save = valid.map( city => city.location )
+      if (save.length > 0) {
+        localStorage.setItem('cities', JSON.stringify(save))
+        return true
+      }
+    }
   }
 }
 
 const getters = {
-  saveCities: (state, getters) => {
-    let valid = getters.validCities
-    let save = valid.map( city => city.location )
-    if (save.length > 0) {
-      localStorage.setItem('cities', JSON.stringify(save))
-      return true
-    }
-  },
   validCities: (state) => state.cities.filter( city => ! city.hasError && city.hasWeather() ),
   noCitiesHaveLocation: (state) => {
     return ! state.cities.some( city => city.location.length != 0 )
