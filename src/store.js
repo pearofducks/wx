@@ -30,15 +30,6 @@ class City {
   hasWeather() {
     return Object.keys(this.weather).length != 0
   }
-  updateWeather() {
-    this.clearWeather()
-    this.isFetching = true
-    let appid = ''
-    fetch(`http://api.openweathermap.org/data/2.5/weather?q=${this.searchLocation()}&APPID=${appid}&units=metric`)
-      .then((response) => { return response.ok ? response.json() : "" })
-      .then((json) => { this.updateWeatherSuccess(json) })
-      .catch((error) => { this.updateWeatherFailure(error) })
-  }
   updateWeatherFailure(error) {
     console.log(error)
     this.isFetching = false
@@ -81,8 +72,9 @@ const mutations = {
   }
 }
 const actions = {
-  removeCity: ({commit, state}, id) => {
+  removeCity: ({commit, state, dispatch}, id) => {
     commit('removeCity', id)
+    dispatch('saveCities')
     // prevent state.cities from being empty (thus no inputs shown to user)
     if (state.cities.length == 0) {
       commit('clearSort')
@@ -100,8 +92,15 @@ const actions = {
       commit('addCity')
     }
   },
-  getWeather: ({commit, state, getters}) => {
-    let fetched = false
+  saveCities: ({getters}) => {
+    let valid = getters.validCities
+    let save = valid.map( city => city.location )
+    if (save.length > 0) {
+      localStorage.setItem('cities', JSON.stringify(save))
+    }
+    else { localStorage.removeItem('cities') }
+  },
+  getWeather: ({commit, state, dispatch}) => {
     state.cities.forEach( (city) => {
       if (city.location.length == 0) {
         city.clearWeather()
@@ -109,18 +108,18 @@ const actions = {
       }
       if (city.newLocation() || ! city.hasWeather()) {
         commit('clearSort')
-        fetched = true
-        city.updateWeather()
+        city.clearWeather()
+        city.isFetching = true
+        let appid = ''
+        fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city.searchLocation()}&APPID=${appid}&units=metric`)
+          .then((response) => { return response.ok ? response.json() : "" })
+          .then((json) => {
+            city.updateWeatherSuccess(json)
+            dispatch('saveCities')
+          })
+          .catch((error) => { city.updateWeatherFailure(error) })
       }
     })
-    if (fetched) {
-      let valid = getters.validCities
-      let save = valid.map( city => city.location )
-      if (save.length > 0) {
-        localStorage.setItem('cities', JSON.stringify(save))
-        return true
-      }
-    }
   }
 }
 
