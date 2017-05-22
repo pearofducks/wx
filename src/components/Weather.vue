@@ -12,7 +12,7 @@
         <div aria-label="wind" class="row wind-wrapper">
           <svg :style="windStyle()" id="i-arrow-top" viewBox="0 0 32 32" width="2.4rem" height="2.4rem" fill="none" stroke="currentcolor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6.25%"> <path d="M6 10 L16 2 26 10 M16 2 L16 30" /> </svg>
           <p class="wind">{{ `${Math.round(city.weather.wind)} km/h` }}</p>
-        <div>
+        </div>
       </section>
     </transition>
   </div>
